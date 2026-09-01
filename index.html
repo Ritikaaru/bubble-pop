@@ -192,38 +192,43 @@
         /* Voice settings panel */
         .voice-settings {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             z-index: 1001;
-            max-width: 250px;
+            width: 320px;
+            max-width: 90vw;
             display: none;
             font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .voice-settings.show {
             display: block;
-            animation: slideIn 0.3s ease-out;
+            animation: scaleIn 0.3s ease-out;
         }
 
-        @keyframes slideIn {
+        @keyframes scaleIn {
             from {
-                transform: translateX(-20px);
+                transform: translate(-50%, -50%) scale(0.8);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translate(-50%, -50%) scale(1);
                 opacity: 1;
             }
         }
 
         .voice-settings h3 {
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             color: #333;
-            font-size: 16px;
+            font-size: 20px;
+            text-align: center;
         }
 
         .voice-option {
@@ -279,15 +284,16 @@
         }
 
         .control-group {
-            margin: 8px 0;
+            margin: 15px 0;
         }
 
         .control-group label {
             display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 3px;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
             font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            font-weight: bold;
         }
 
         .control-group input[type="range"] {
@@ -297,31 +303,65 @@
 
         .control-group select {
             font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: 14px;
+            background: white;
         }
 
         .test-voice-btn {
             width: 100%;
-            padding: 8px;
-            margin-top: 10px;
+            padding: 12px;
+            margin-top: 15px;
             background: #4CAF50;
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             transition: all 0.2s;
             font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            font-weight: bold;
         }
 
         .test-voice-btn:hover {
             background: #45a049;
         }
 
+        .done-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .done-btn:hover {
+            background: #FF5252;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .done-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+
         /* Mobile responsive adjustments */
         @media (max-width: 600px) {
             .voice-settings {
-                max-width: 200px;
-                padding: 10px;
+                width: 280px;
+                padding: 20px;
             }
             
             .title {
@@ -342,29 +382,30 @@
     <!-- Voice Settings Button -->
     <button class="voice-toggle-btn" id="voiceToggleBtn" title="Voice Settings">🎙️</button>
     
-    <!-- Voice Settings Panel -->
+    <!-- Voice Settings Modal -->
     <div class="voice-settings" id="voiceSettings">
         <h3>🎙️ Voice Settings</h3>
         
         <div class="voice-controls">
             <div class="control-group">
-                <label>Voice:</label>
-                <select id="voiceSelect" style="width: 100%; padding: 5px; border-radius: 5px;">
+                <label>Select Voice:</label>
+                <select id="voiceSelect">
                     <option value="">Loading voices...</option>
                 </select>
             </div>
             
             <div class="control-group">
-                <label>Speed: <span id="speedValue">0.8</span>x</label>
+                <label>Speaking Speed: <span id="speedValue">0.8</span>x</label>
                 <input type="range" id="speedControl" min="0.5" max="1.5" step="0.1" value="0.8">
             </div>
             
             <div class="control-group">
-                <label>Pitch: <span id="pitchValue">1.2</span></label>
+                <label>Voice Pitch: <span id="pitchValue">1.2</span></label>
                 <input type="range" id="pitchControl" min="0.5" max="2.0" step="0.1" value="1.2">
             </div>
             
             <button class="test-voice-btn" id="testVoiceBtn">🔊 Test Voice</button>
+            <button class="done-btn" id="doneBtn">✓ Done</button>
         </div>
     </div>
     
@@ -447,50 +488,106 @@
                 if (this.voices.length > 0) {
                     voiceSelect.innerHTML = '';
                     
+                    // Categorize voices
+                    const googleVoices = this.voices.filter(voice => 
+                        voice.name.includes('Google') || voice.voiceURI.includes('Google')
+                    );
+                    
                     const englishVoices = this.voices.filter(voice => 
-                        voice.lang.startsWith('en') || voice.lang.startsWith('EN')
+                        (voice.lang.startsWith('en') || voice.lang.startsWith('EN')) && 
+                        !voice.name.includes('Google')
                     );
                     
                     const otherVoices = this.voices.filter(voice => 
-                        !voice.lang.startsWith('en') && !voice.lang.startsWith('EN')
+                        !voice.lang.startsWith('en') && 
+                        !voice.lang.startsWith('EN') && 
+                        !voice.name.includes('Google')
                     );
                     
+                    // Add Google voices first (prioritize Rishi)
+                    if (googleVoices.length > 0) {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = '🌟 Google Voices';
+                        
+                        // Sort to put Rishi first
+                        const sortedGoogleVoices = googleVoices.sort((a, b) => {
+                            if (a.name.includes('Rishi')) return -1;
+                            if (b.name.includes('Rishi')) return 1;
+                            return a.name.localeCompare(b.name);
+                        });
+                        
+                        sortedGoogleVoices.forEach((voice) => {
+                            const option = document.createElement('option');
+                            option.value = this.voices.indexOf(voice);
+                            const flag = voice.lang.includes('GB') ? '🇬🇧' : 
+                                        voice.lang.includes('US') ? '🇺🇸' : 
+                                        voice.lang.includes('IN') ? '🇮🇳' : '🌍';
+                            option.textContent = `${flag} ${voice.name} (${voice.lang})`;
+                            optgroup.appendChild(option);
+                        });
+                        voiceSelect.appendChild(optgroup);
+                    }
+                    
+                    // Add other English voices
                     if (englishVoices.length > 0) {
                         const optgroup = document.createElement('optgroup');
                         optgroup.label = 'English Voices';
-                        englishVoices.forEach((voice, index) => {
+                        englishVoices.forEach((voice) => {
                             const option = document.createElement('option');
-                            option.value = index;
+                            option.value = this.voices.indexOf(voice);
                             option.textContent = `${voice.name} (${voice.lang})`;
                             optgroup.appendChild(option);
                         });
                         voiceSelect.appendChild(optgroup);
                     }
                     
+                    // Add other language voices
                     if (otherVoices.length > 0) {
                         const optgroup = document.createElement('optgroup');
                         optgroup.label = 'Other Languages';
-                        otherVoices.forEach((voice, index) => {
+                        otherVoices.forEach((voice) => {
                             const option = document.createElement('option');
-                            option.value = englishVoices.length + index;
+                            option.value = this.voices.indexOf(voice);
                             option.textContent = `${voice.name} (${voice.lang})`;
                             optgroup.appendChild(option);
                         });
                         voiceSelect.appendChild(optgroup);
                     }
                     
-                    const defaultVoiceIndex = englishVoices.findIndex(voice => 
-                        voice.name.includes('Female') || 
-                        voice.name.includes('Samantha') || 
-                        voice.name.includes('Google UK English Female') ||
-                        voice.name.includes('Microsoft Zira')
+                    // Try to select Google Rishi voice by default
+                    const rishiVoice = this.voices.find(voice => 
+                        voice.name.includes('Rishi') && voice.name.includes('Google')
                     );
                     
-                    if (defaultVoiceIndex > -1) {
-                        voiceSelect.value = defaultVoiceIndex;
-                        this.selectedVoice = englishVoices[defaultVoiceIndex];
+                    if (rishiVoice) {
+                        this.selectedVoice = rishiVoice;
+                        voiceSelect.value = this.voices.indexOf(rishiVoice);
                     } else {
-                        this.selectedVoice = englishVoices[0] || this.voices[0];
+                        // Fallback to other Google voices
+                        const googleDefault = googleVoices.find(voice => 
+                            voice.name.includes('Female') || 
+                            voice.name.includes('Google UK English Female') ||
+                            voice.name.includes('Google US English')
+                        );
+                        
+                        if (googleDefault) {
+                            this.selectedVoice = googleDefault;
+                            voiceSelect.value = this.voices.indexOf(googleDefault);
+                        } else {
+                            // Fallback to any English voice
+                            const defaultVoice = englishVoices.find(voice => 
+                                voice.name.includes('Female') || 
+                                voice.name.includes('Samantha') || 
+                                voice.name.includes('Microsoft Zira')
+                            );
+                            
+                            if (defaultVoice) {
+                                this.selectedVoice = defaultVoice;
+                                voiceSelect.value = this.voices.indexOf(defaultVoice);
+                            } else {
+                                this.selectedVoice = this.voices[0];
+                            }
+                        }
                     }
                 } else {
                     voiceSelect.innerHTML = '<option value="">No voices available</option>';
@@ -512,13 +609,36 @@
 
                 const voiceToggleBtn = document.getElementById('voiceToggleBtn');
                 const voiceSettings = document.getElementById('voiceSettings');
+                const doneBtn = document.getElementById('doneBtn');
                 
+                // Open voice settings
                 voiceToggleBtn.addEventListener('click', () => {
-                    this.voiceSettingsOpen = !this.voiceSettingsOpen;
-                    if (this.voiceSettingsOpen) {
-                        voiceSettings.classList.add('show');
-                    } else {
-                        voiceSettings.classList.remove('show');
+                    this.voiceSettingsOpen = true;
+                    voiceSettings.classList.add('show');
+                    // Pause game while settings are open
+                    this.pauseGame();
+                });
+                
+                // Close voice settings with Done button
+                const closeVoiceSettings = () => {
+                    this.voiceSettingsOpen = false;
+                    voiceSettings.classList.remove('show');
+                    // Resume game after settings are closed
+                    this.resumeGame();
+                };
+                
+                doneBtn.addEventListener('click', closeVoiceSettings);
+                doneBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    closeVoiceSettings();
+                });
+                
+                // Close settings when clicking outside the panel
+                document.addEventListener('click', (e) => {
+                    if (this.voiceSettingsOpen && 
+                        !e.target.closest('.voice-settings') && 
+                        !e.target.closest('.voice-toggle-btn')) {
+                        closeVoiceSettings();
                     }
                 });
 
@@ -565,7 +685,7 @@
             }
 
             testVoice() {
-                const testMessage = "Hello! This is your voice test. A B C D E F G!";
+                const testMessage = "Hello! My name is Rishi. A B C D E F G!";
                 this.speak(testMessage);
             }
 
@@ -800,6 +920,7 @@
                     
                     if (this.selectedVoice) {
                         utterance.voice = this.selectedVoice;
+                        utterance.lang = this.selectedVoice.lang;
                     }
                     
                     utterance.rate = this.speechRate;
