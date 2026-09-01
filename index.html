@@ -1,1020 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Baby Bubble Pop - Learn Letters!</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bubble Pop!</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body {
+    height:100%; overflow:hidden;
+    font-family:"Arial Rounded MT Bold","Arial Rounded MT",Arial,Helvetica,sans-serif;
+    background:linear-gradient(to bottom,#87CEEB 0%,#B0E0F6 45%,#E0F6FF 100%);
+    touch-action:manipulation; user-select:none; -webkit-user-select:none;
+  }
+  #game { position:fixed; inset:0; overflow:hidden; }
 
-        body {
-            overflow: hidden;
-            background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 50%, #B2EBF2 100%);
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            height: 100vh;
-            width: 100vw;
-            position: relative;
-        }
+  .bubble {
+    position:absolute; bottom:-140px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:bold; cursor:pointer;
+    box-shadow:inset -8px -8px 18px rgba(255,255,255,.35), inset 8px 8px 18px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.15);
+    animation:rise linear forwards; will-change:transform;
+    transition:transform .08s ease;
+  }
+  .bubble::after {
+    content:""; position:absolute; top:16%; left:20%;
+    width:28%; height:22%; border-radius:50%;
+    background:rgba(255,255,255,.6); filter:blur(1px);
+  }
+  .bubble.blank {
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.7), rgba(135,206,235,.35) 60%, rgba(120,190,225,.3));
+    border:2px solid rgba(255,255,255,.5);
+  }
+  @media (hover:hover){ .bubble:hover{ transform:scale(1.08); } }
+  .bubble.pop { animation:none; transform:scale(1.4); opacity:0; transition:transform .18s ease, opacity .18s ease; }
 
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: floatUp linear infinite;
-            box-shadow: 
-                inset -5px -5px 15px rgba(0, 0, 0, 0.1),
-                inset 5px 5px 15px rgba(255, 255, 255, 0.5),
-                0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.1s;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-            will-change: transform;
-            pointer-events: auto;
-            z-index: 10;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            font-style: normal;
-            letter-spacing: normal;
-        }
+  @keyframes rise {
+    from { transform:translateY(0) translateX(0); }
+    to   { transform:translateY(-115vh) translateX(var(--drift,0px)); }
+  }
 
-        .bubble:hover {
-            transform: scale(1.1);
-            box-shadow: 
-                inset -5px -5px 15px rgba(0, 0, 0, 0.1),
-                inset 5px 5px 15px rgba(255, 255, 255, 0.5),
-                0 8px 25px rgba(0, 0, 0, 0.3);
-        }
+  .particle {
+    position:absolute; border-radius:50%; pointer-events:none; will-change:transform,opacity;
+    animation:burst .6s ease-out forwards;
+  }
+  @keyframes burst {
+    from { transform:translate(0,0) scale(1); opacity:1; }
+    to   { transform:translate(var(--px),var(--py)) scale(.2); opacity:0; }
+  }
 
-        .bubble:active {
-            transform: scale(0.85);
-        }
+  #score {
+    position:fixed; top:14px; right:16px; z-index:20;
+    background:rgba(255,255,255,.85); color:#0077aa;
+    padding:8px 18px; border-radius:22px; font-size:24px;
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+  }
 
-        @keyframes floatUp {
-            from {
-                transform: translateY(100vh);
-            }
-            to {
-                transform: translateY(-150px);
-            }
-        }
+  #controls {
+    position:fixed; bottom:16px; left:0; right:0; z-index:20;
+    display:flex; gap:14px; justify-content:center;
+  }
+  #controls button {
+    font-family:inherit; font-weight:bold; border:none; cursor:pointer;
+    border-radius:26px; padding:14px 22px; font-size:18px; color:#fff;
+    box-shadow:0 4px 10px rgba(0,0,0,.2); transition:transform .1s;
+  }
+  #controls button:active{ transform:scale(.94); }
+  #restartBtn{ background:linear-gradient(135deg,#ff8fb1,#ff5f8f); }
+  #voiceBtn{ background:linear-gradient(135deg,#7ec8ff,#4a9fe0); font-size:22px; padding:14px 20px; }
 
-        @keyframes popAnimation {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.5);
-                opacity: 0.5;
-            }
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
-        }
-
-        .bubble-popping {
-            animation: popAnimation 0.3s ease-out forwards !important;
-            pointer-events: none !important;
-        }
-
-        .score-display {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #FF6B6B;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-        }
-
-        .title {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 28px;
-            color: #FFFFFF;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            z-index: 999;
-            text-align: center;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            font-weight: bold;
-        }
-
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: particleBurst 0.5s ease-out forwards;
-            z-index: 20;
-        }
-
-        @keyframes particleBurst {
-            from {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            to {
-                transform: translate(var(--tx), var(--ty)) scale(0);
-                opacity: 0;
-            }
-        }
-
-        .restart-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #FF6B6B;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 15px 30px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-            z-index: 1000;
-            transition: all 0.3s;
-            touch-action: manipulation;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-        }
-
-        .restart-btn:hover {
-            background: #FF5252;
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
-            transform: translateX(-50%) translateY(-2px);
-        }
-
-        .restart-btn:active {
-            transform: translateX(-50%) scale(0.9);
-            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
-        }
-
-        .emoji-bubble {
-            font-size: 40px;
-        }
-
-        .letter-bubble {
-            color: #FF4081;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif !important;
-            font-style: normal !important;
-            font-weight: bold !important;
-        }
-
-        .number-bubble {
-            color: #2196F3;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif !important;
-            font-style: normal !important;
-            font-weight: bold !important;
-        }
-
-        .blank-bubble {
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(200, 220, 255, 0.8)) !important;
-        }
-
-        /* Voice settings panel */
-        .voice-settings {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            width: 320px;
-            max-width: 90vw;
-            display: none;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .voice-settings.show {
-            display: block;
-            animation: scaleIn 0.3s ease-out;
-        }
-
-        @keyframes scaleIn {
-            from {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-
-        .voice-settings h3 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 20px;
-            text-align: center;
-        }
-
-        .voice-option {
-            display: block;
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        .voice-option:hover {
-            background: #f0f0f0;
-            border-color: #FF6B6B;
-        }
-
-        .voice-option.active {
-            background: #FFE5E5;
-            border-color: #FF6B6B;
-            color: #FF6B6B;
-            font-weight: bold;
-        }
-
-        .voice-toggle-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            transition: all 0.3s;
-        }
-
-        .voice-toggle-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Speed and pitch controls */
-        .voice-controls {
-            margin-top: 10px;
-        }
-
-        .control-group {
-            margin: 15px 0;
-        }
-
-        .control-group label {
-            display: block;
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 8px;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            font-weight: bold;
-        }
-
-        .control-group input[type="range"] {
-            width: 100%;
-            margin: 0;
-        }
-
-        .control-group select {
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            font-size: 14px;
-            background: white;
-        }
-
-        .test-voice-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            font-weight: bold;
-        }
-
-        .test-voice-btn:hover {
-            background: #45a049;
-        }
-
-        .done-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: #FF6B6B;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-
-        .done-btn:hover {
-            background: #FF5252;
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .done-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
-        }
-
-        /* Mobile responsive adjustments */
-        @media (max-width: 600px) {
-            .voice-settings {
-                width: 280px;
-                padding: 20px;
-            }
-            
-            .title {
-                font-size: 22px;
-            }
-            
-            .score-display {
-                font-size: 18px;
-                padding: 8px 15px;
-            }
-        }
-    </style>
+  #overlay {
+    position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.4);
+    display:none; align-items:center; justify-content:center;
+  }
+  #overlay.show{ display:flex; }
+  #modal {
+    background:#fff; border-radius:22px; padding:24px; width:min(92vw,420px);
+    max-height:88vh; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,.3);
+    transform:scale(.7); opacity:0; transition:transform .25s ease, opacity .25s ease;
+  }
+  #overlay.show #modal{ transform:scale(1); opacity:1; }
+  #modal h2{ color:#4a9fe0; text-align:center; margin-bottom:16px; font-size:24px; }
+  #modal label{ display:block; margin:14px 0 6px; color:#555; font-size:15px; }
+  #modal select, #modal input[type=range]{ width:100%; }
+  #modal select{ padding:10px; border-radius:12px; border:2px solid #cfe6f5; font-family:inherit; font-size:15px; background:#f5fbff; }
+  .val{ color:#4a9fe0; font-weight:bold; }
+  #testBtn{ width:100%; margin-top:18px; padding:12px; border:none; border-radius:14px; background:linear-gradient(135deg,#ffd36e,#ffb347); color:#7a5200; font-family:inherit; font-weight:bold; font-size:16px; cursor:pointer; }
+  #doneBtn{ width:100%; margin-top:12px; padding:16px; border:none; border-radius:16px; background:linear-gradient(135deg,#5fd68a,#37b86a); color:#fff; font-family:inherit; font-weight:bold; font-size:20px; cursor:pointer; box-shadow:0 4px 12px rgba(55,184,106,.4); }
+  #testBtn:active,#doneBtn:active{ transform:scale(.97); }
+</style>
 </head>
 <body>
-    <div class="title">🎈 Pop the Bubbles! 🎈</div>
-    <div class="score-display">⭐ <span id="score">0</span></div>
-    
-    <!-- Voice Settings Button -->
-    <button class="voice-toggle-btn" id="voiceToggleBtn" title="Voice Settings">🎙️</button>
-    
-    <!-- Voice Settings Modal -->
-    <div class="voice-settings" id="voiceSettings">
-        <h3>🎙️ Voice Settings</h3>
-        
-        <div class="voice-controls">
-            <div class="control-group">
-                <label>Select Voice:</label>
-                <select id="voiceSelect">
-                    <option value="">Loading voices...</option>
-                </select>
-            </div>
-            
-            <div class="control-group">
-                <label>Speaking Speed: <span id="speedValue">0.8</span>x</label>
-                <input type="range" id="speedControl" min="0.5" max="1.5" step="0.1" value="0.8">
-            </div>
-            
-            <div class="control-group">
-                <label>Voice Pitch: <span id="pitchValue">1.2</span></label>
-                <input type="range" id="pitchControl" min="0.5" max="2.0" step="0.1" value="1.2">
-            </div>
-            
-            <button class="test-voice-btn" id="testVoiceBtn">🔊 Test Voice</button>
-            <button class="done-btn" id="doneBtn">✓ Done</button>
-        </div>
-    </div>
-    
-    <button class="restart-btn" id="restartBtn">🔄 New Bubbles!</button>
+<div id="game"></div>
+<div id="score">⭐ 0</div>
 
-    <script>
-        class BubblePopGame {
-            constructor() {
-                this.score = 0;
-                this.bubbles = [];
-                this.maxBubbles = 10;
-                this.bubbleCount = 0;
-                this.audioContext = null;
-                this.isMobile = 'ontouchstart' in window;
-                this.isDesktop = !this.isMobile || (window.matchMedia('(hover: hover) and (pointer: fine)').matches);
-                this.lastClickTime = 0;
-                this.clickThrottle = 300;
-                this.isSpeaking = false;
-                this.speechQueue = [];
-                
-                // Voice settings
-                this.voices = [];
-                this.selectedVoice = null;
-                this.speechRate = 0.8;
-                this.speechPitch = 1.2;
-                this.voiceSettingsOpen = false;
-                
-                // Content for bubbles
-                this.contentTypes = [
-                    { type: 'letter', values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'] },
-                    { type: 'number', values: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] },
-                    { type: 'emoji', values: ['😊', '🌟', '🎈', '🦄', '🌈', '🍎', '🐱', '🐶', '🦋', '🌸', '⭐', '🎨', '🚗', '🎵', '🐰'] },
-                    { type: 'blank', values: [''] }
-                ];
+<div id="controls">
+  <button id="restartBtn">🔄 New Bubbles!</button>
+  <button id="voiceBtn">🎙️</button>
+</div>
 
-                // Colors for bubbles
-                this.colors = [
-                    'rgba(255, 100, 100, 0.7)',
-                    'rgba(100, 255, 100, 0.7)',
-                    'rgba(100, 100, 255, 0.7)',
-                    'rgba(255, 255, 100, 0.7)',
-                    'rgba(255, 100, 255, 0.7)',
-                    'rgba(100, 255, 255, 0.7)',
-                    'rgba(255, 150, 50, 0.7)',
-                    'rgba(150, 100, 255, 0.7)'
-                ];
+<div id="overlay">
+  <div id="modal">
+    <h2>🎙️ Voice Settings</h2>
+    <label for="voiceSel">Voice</label>
+    <select id="voiceSel"></select>
+    <label>Speed: <span class="val" id="rateVal">1.0</span>x</label>
+    <input type="range" id="rate" min="0.5" max="1.5" step="0.1" value="1">
+    <label>Pitch: <span class="val" id="pitchVal">1.0</span></label>
+    <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1">
+    <button id="testBtn">🔊 Test Voice</button>
+    <button id="doneBtn">✓ Done</button>
+  </div>
+</div>
 
-                // Blank bubble colors (lighter, more bubble-like)
-                this.blankColors = [
-                    'rgba(180, 220, 255, 0.6)',
-                    'rgba(200, 230, 255, 0.6)',
-                    'rgba(220, 240, 255, 0.6)',
-                    'rgba(190, 225, 255, 0.6)',
-                    'rgba(210, 235, 255, 0.6)'
-                ];
+<script>
+(function(){
+  const game=document.getElementById('game');
+  const scoreEl=document.getElementById('score');
+  const overlay=document.getElementById('overlay');
+  const voiceSel=document.getElementById('voiceSel');
+  const rate=document.getElementById('rate'), pitch=document.getElementById('pitch');
+  const rateVal=document.getElementById('rateVal'), pitchVal=document.getElementById('pitchVal');
 
-                this.initAudio();
-                this.initVoices();
-                this.setupEventListeners();
-                this.startGame();
-            }
+  let score=0, paused=false;
+  const MAX=10;
+  const colors=['#e74c3c','#2ecc71','#3498db','#f1c40f','#ff79c6','#00d0d0','#e67e22','#9b59b6'];
 
-            initAudio() {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
+  // ---------- Audio ----------
+  let actx;
+  function audio(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+  function popSound(){
+    try{
+      const c=audio(); if(c.state==='suspended') c.resume();
+      const o=c.createOscillator(), g=c.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(600,c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(100,c.currentTime+0.15);
+      g.gain.setValueAtTime(0.3,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.15);
+      o.connect(g); g.connect(c.destination);
+      o.start(); o.stop(c.currentTime+0.15);
+    }catch(e){}
+  }
 
-            initVoices() {
-                if ('speechSynthesis' in window) {
-                    this.loadVoices();
-                    window.speechSynthesis.onvoiceschanged = () => {
-                        this.loadVoices();
-                    };
-                }
-            }
+  // ---------- Speech ----------
+  let voices=[], speaking=false, queue=[], voiceTries=0;
+  function loadVoices(){
+    voices=speechSynthesis.getVoices();
+    if(!voices.length){
+      // Chrome populates voices asynchronously; retry a few times.
+      if(voiceTries++<20) setTimeout(loadVoices,250);
+      return;
+    }
+    const prev=voiceSel.value;
+    voiceSel.innerHTML='';
+    const google=voices.filter(v=>/google/i.test(v.name)).sort((a,b)=>(/rishi/i.test(b.name)?1:0)-(/rishi/i.test(a.name)?1:0));
+    const eng=voices.filter(v=>/en/i.test(v.lang)&&!/google/i.test(v.name));
+    const other=voices.filter(v=>!/en/i.test(v.lang)&&!/google/i.test(v.name));
+    function grp(label,list){
+      if(!list.length) return;
+      const og=document.createElement('optgroup'); og.label=label;
+      list.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=v.name+' ('+v.lang+')'; og.appendChild(o); });
+      voiceSel.appendChild(og);
+    }
+    grp('Google Voices',google); grp('English Voices',eng); grp('Other Languages',other);
+    if(prev && voices.some(v=>v.name===prev)) voiceSel.value=prev;
+    else if(google.length) voiceSel.value=google[0].name;
+  }
+  speechSynthesis.onvoiceschanged=loadVoices; loadVoices();
 
-            loadVoices() {
-                this.voices = window.speechSynthesis.getVoices();
-                const voiceSelect = document.getElementById('voiceSelect');
-                
-                if (this.voices.length > 0) {
-                    voiceSelect.innerHTML = '';
-                    
-                    // Categorize voices
-                    const googleVoices = this.voices.filter(voice => 
-                        voice.name.includes('Google') || voice.voiceURI.includes('Google')
-                    );
-                    
-                    const englishVoices = this.voices.filter(voice => 
-                        (voice.lang.startsWith('en') || voice.lang.startsWith('EN')) && 
-                        !voice.name.includes('Google')
-                    );
-                    
-                    const otherVoices = this.voices.filter(voice => 
-                        !voice.lang.startsWith('en') && 
-                        !voice.lang.startsWith('EN') && 
-                        !voice.name.includes('Google')
-                    );
-                    
-                    // Add Google voices first (prioritize Rishi)
-                    if (googleVoices.length > 0) {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = '🌟 Google Voices';
-                        
-                        // Sort to put Rishi first
-                        const sortedGoogleVoices = googleVoices.sort((a, b) => {
-                            if (a.name.includes('Rishi')) return -1;
-                            if (b.name.includes('Rishi')) return 1;
-                            return a.name.localeCompare(b.name);
-                        });
-                        
-                        sortedGoogleVoices.forEach((voice) => {
-                            const option = document.createElement('option');
-                            option.value = this.voices.indexOf(voice);
-                            const flag = voice.lang.includes('GB') ? '🇬🇧' : 
-                                        voice.lang.includes('US') ? '🇺🇸' : 
-                                        voice.lang.includes('IN') ? '🇮🇳' : '🌍';
-                            option.textContent = `${flag} ${voice.name} (${voice.lang})`;
-                            optgroup.appendChild(option);
-                        });
-                        voiceSelect.appendChild(optgroup);
-                    }
-                    
-                    // Add other English voices
-                    if (englishVoices.length > 0) {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = 'English Voices';
-                        englishVoices.forEach((voice) => {
-                            const option = document.createElement('option');
-                            option.value = this.voices.indexOf(voice);
-                            option.textContent = `${voice.name} (${voice.lang})`;
-                            optgroup.appendChild(option);
-                        });
-                        voiceSelect.appendChild(optgroup);
-                    }
-                    
-                    // Add other language voices
-                    if (otherVoices.length > 0) {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = 'Other Languages';
-                        otherVoices.forEach((voice) => {
-                            const option = document.createElement('option');
-                            option.value = this.voices.indexOf(voice);
-                            option.textContent = `${voice.name} (${voice.lang})`;
-                            optgroup.appendChild(option);
-                        });
-                        voiceSelect.appendChild(optgroup);
-                    }
-                    
-                    // Try to select Google Rishi voice by default
-                    const rishiVoice = this.voices.find(voice => 
-                        voice.name.includes('Rishi') && voice.name.includes('Google')
-                    );
-                    
-                    if (rishiVoice) {
-                        this.selectedVoice = rishiVoice;
-                        voiceSelect.value = this.voices.indexOf(rishiVoice);
-                    } else {
-                        // Fallback to other Google voices
-                        const googleDefault = googleVoices.find(voice => 
-                            voice.name.includes('Female') || 
-                            voice.name.includes('Google UK English Female') ||
-                            voice.name.includes('Google US English')
-                        );
-                        
-                        if (googleDefault) {
-                            this.selectedVoice = googleDefault;
-                            voiceSelect.value = this.voices.indexOf(googleDefault);
-                        } else {
-                            // Fallback to any English voice
-                            const defaultVoice = englishVoices.find(voice => 
-                                voice.name.includes('Female') || 
-                                voice.name.includes('Samantha') || 
-                                voice.name.includes('Microsoft Zira')
-                            );
-                            
-                            if (defaultVoice) {
-                                this.selectedVoice = defaultVoice;
-                                voiceSelect.value = this.voices.indexOf(defaultVoice);
-                            } else {
-                                this.selectedVoice = this.voices[0];
-                            }
-                        }
-                    }
-                } else {
-                    voiceSelect.innerHTML = '<option value="">No voices available</option>';
-                }
-            }
+  function speakNext(){
+    if(speaking||!queue.length) return;
+    const text=queue.shift(); speaking=true;
+    const u=new SpeechSynthesisUtterance(text);
+    const v=voices.find(x=>x.name===voiceSel.value); if(v) u.voice=v;
+    u.rate=parseFloat(rate.value); u.pitch=parseFloat(pitch.value);
+    u.onend=u.onerror=()=>{ setTimeout(()=>{ speaking=false; speakNext(); },1000); };
+    speechSynthesis.speak(u);
+  }
+  function enqueue(text){ queue.push(text); if(queue.length>3) queue.shift(); setTimeout(speakNext,150); }
 
-            setupEventListeners() {
-                const restartBtn = document.getElementById('restartBtn');
-                restartBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.clearBubbles();
-                    this.startGame();
-                });
-                restartBtn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.clearBubbles();
-                    this.startGame();
-                });
+  // ---------- Bubbles ----------
+  function spawn(){
+    if(paused) return;
+    if(game.querySelectorAll('.bubble').length>=MAX) return;
+    const size=60+Math.random()*40;
+    const b=document.createElement('div');
+    b.className='bubble';
+    b.style.width=b.style.height=size+'px';
+    b.style.left=Math.random()*(window.innerWidth-size)+'px';
+    b.style.setProperty('--drift',(Math.random()*80-40)+'px');
+    const dur=7+Math.random()*5;
+    b.style.animationDuration=dur+'s';
 
-                const voiceToggleBtn = document.getElementById('voiceToggleBtn');
-                const voiceSettings = document.getElementById('voiceSettings');
-                const doneBtn = document.getElementById('doneBtn');
-                
-                // Open voice settings
-                voiceToggleBtn.addEventListener('click', () => {
-                    this.voiceSettingsOpen = true;
-                    voiceSettings.classList.add('show');
-                    // Pause game while settings are open
-                    this.pauseGame();
-                });
-                
-                // Close voice settings with Done button
-                const closeVoiceSettings = () => {
-                    this.voiceSettingsOpen = false;
-                    voiceSettings.classList.remove('show');
-                    // Resume game after settings are closed
-                    this.resumeGame();
-                };
-                
-                doneBtn.addEventListener('click', closeVoiceSettings);
-                doneBtn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    closeVoiceSettings();
-                });
-                
-                // Close settings when clicking outside the panel
-                document.addEventListener('click', (e) => {
-                    if (this.voiceSettingsOpen && 
-                        !e.target.closest('.voice-settings') && 
-                        !e.target.closest('.voice-toggle-btn')) {
-                        closeVoiceSettings();
-                    }
-                });
+    const isBlank=Math.random()<0.5;
+    if(isBlank){ b.classList.add('blank'); }
+    else{
+      let content, speech;
+      if(Math.random()<0.5){ const c=String.fromCharCode(65+Math.floor(Math.random()*26)); content=c; speech=c; }
+      else{ const n=1+Math.floor(Math.random()*10); content=n; speech=''+n; }
+      b.textContent=content;
+      b.dataset.speech=speech;
+      b.style.fontSize=(size*0.45)+'px';
+      b.style.background=colors[Math.floor(Math.random()*colors.length)];
+      b.style.color='#fff';
+      b.style.textShadow='1px 1px 3px rgba(0,0,0,.3)';
+    }
+    b.addEventListener('animationend',()=>b.remove());
+    game.appendChild(b);
+  }
 
-                document.getElementById('voiceSelect').addEventListener('change', (e) => {
-                    const voiceIndex = parseInt(e.target.value);
-                    if (voiceIndex >= 0 && voiceIndex < this.voices.length) {
-                        this.selectedVoice = this.voices[voiceIndex];
-                        this.testVoice();
-                    }
-                });
+  function burst(x,y){
+    for(let i=0;i<10;i++){
+      const p=document.createElement('div');
+      p.className='particle';
+      const s=6+Math.random()*8;
+      p.style.width=p.style.height=s+'px';
+      p.style.left=x+'px'; p.style.top=y+'px';
+      p.style.background=colors[Math.floor(Math.random()*colors.length)];
+      const a=Math.random()*Math.PI*2, d=40+Math.random()*50;
+      p.style.setProperty('--px',Math.cos(a)*d+'px');
+      p.style.setProperty('--py',Math.sin(a)*d+'px');
+      game.appendChild(p);
+      p.addEventListener('animationend',()=>p.remove());
+    }
+  }
 
-                document.getElementById('speedControl').addEventListener('input', (e) => {
-                    this.speechRate = parseFloat(e.target.value);
-                    document.getElementById('speedValue').textContent = this.speechRate.toFixed(1);
-                });
+  function pop(b,x,y){
+    if(b.classList.contains('pop')) return;
+    popSound();
+    const r=b.getBoundingClientRect();
+    burst(x||r.left+r.width/2, y||r.top+r.height/2);
+    b.classList.add('pop');
+    setTimeout(()=>b.remove(),200);
+    score++; scoreEl.textContent='⭐ '+score;
+    if(b.dataset.speech) enqueue(b.dataset.speech);
+  }
 
-                document.getElementById('pitchControl').addEventListener('input', (e) => {
-                    this.speechPitch = parseFloat(e.target.value);
-                    document.getElementById('pitchValue').textContent = this.speechPitch.toFixed(1);
-                });
+  function handle(e){
+    if(paused) return;
+    const b=e.target.closest('.bubble');
+    if(!b) return;
+    e.preventDefault();
+    const t=e.changedTouches?e.changedTouches[0]:e;
+    pop(b,t.clientX,t.clientY);
+  }
+  game.addEventListener('touchstart',handle,{passive:false});
+  game.addEventListener('mousedown',handle);
+  document.addEventListener('contextmenu',e=>{ if(e.target.closest('#game')) e.preventDefault(); });
 
-                document.getElementById('testVoiceBtn').addEventListener('click', () => {
-                    this.testVoice();
-                });
+  // ---------- Controls ----------
+  document.getElementById('restartBtn').addEventListener('click',()=>{
+    game.querySelectorAll('.bubble,.particle').forEach(el=>el.remove());
+    score=0; scoreEl.textContent='⭐ 0';
+    audio();
+  });
+  document.getElementById('voiceBtn').addEventListener('click',()=>{ overlay.classList.add('show'); paused=true; audio(); });
+  document.getElementById('doneBtn').addEventListener('click',()=>{ overlay.classList.remove('show'); paused=false; });
+  overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('show'); paused=false; } });
+  document.getElementById('testBtn').addEventListener('click',()=>{ queue=[]; speaking=false; speechSynthesis.cancel(); enqueue('Hello! Let us play.'); });
+  rate.addEventListener('input',()=>rateVal.textContent=parseFloat(rate.value).toFixed(1));
+  pitch.addEventListener('input',()=>pitchVal.textContent=parseFloat(pitch.value).toFixed(1));
 
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        this.pauseGame();
-                    } else {
-                        this.resumeGame();
-                    }
-                });
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) paused=true; else if(!overlay.classList.contains('show')) paused=false; });
 
-                window.addEventListener('resize', () => {
-                    this.bubbles.forEach(bubble => {
-                        if (bubble.element && bubble.element.parentNode) {
-                            const rect = bubble.element.getBoundingClientRect();
-                            if (rect.left < 0 || rect.right > window.innerWidth) {
-                                bubble.element.style.left = Math.random() * (window.innerWidth - rect.width) + 'px';
-                            }
-                        }
-                    });
-                });
-            }
-
-            testVoice() {
-                const testMessage = "Hello! My name is Rishi. A B C D E F G!";
-                this.speak(testMessage);
-            }
-
-            startGame() {
-                this.score = 0;
-                this.updateScore();
-                this.createInitialBubbles();
-                
-                this.bubbleInterval = setInterval(() => {
-                    if (this.bubbles.length < this.maxBubbles) {
-                        this.createBubble();
-                    }
-                }, 1500);
-            }
-
-            pauseGame() {
-                clearInterval(this.bubbleInterval);
-                this.bubbles.forEach(bubble => {
-                    if (bubble.element) {
-                        bubble.element.style.animationPlayState = 'paused';
-                    }
-                });
-            }
-
-            resumeGame() {
-                this.bubbles.forEach(bubble => {
-                    if (bubble.element) {
-                        bubble.element.style.animationPlayState = 'running';
-                    }
-                });
-                this.bubbleInterval = setInterval(() => {
-                    if (this.bubbles.length < this.maxBubbles) {
-                        this.createBubble();
-                    }
-                }, 1500);
-            }
-
-            createInitialBubbles() {
-                for (let i = 0; i < 7; i++) {
-                    setTimeout(() => this.createBubble(), i * 200);
-                }
-            }
-
-            createBubble() {
-                if (this.bubbles.length >= this.maxBubbles) return;
-
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                
-                const size = Math.random() * 40 + 60;
-                bubble.style.width = size + 'px';
-                bubble.style.height = size + 'px';
-                
-                const x = Math.random() * (window.innerWidth - size);
-                bubble.style.left = x + 'px';
-                
-                // 50% chance of blank bubble
-                const isBlank = Math.random() < 0.5;
-                
-                let color;
-                let content = '';
-                let contentType;
-                
-                if (isBlank) {
-                    // Blank bubble - lighter color, no content
-                    color = this.blankColors[Math.floor(Math.random() * this.blankColors.length)];
-                    bubble.classList.add('blank-bubble');
-                    contentType = { type: 'blank', values: [''] };
-                } else {
-                    // Content bubble
-                    color = this.colors[Math.floor(Math.random() * this.colors.length)];
-                    contentType = this.contentTypes[Math.floor(Math.random() * 3)]; // Only letter, number, emoji
-                    content = contentType.values[Math.floor(Math.random() * contentType.values.length)];
-                }
-                
-                bubble.style.background = `radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), ${color})`;
-                
-                // Set content and styling
-                if (!isBlank) {
-                    bubble.textContent = content;
-                    if (contentType.type === 'letter') {
-                        bubble.classList.add('letter-bubble');
-                        bubble.style.fontSize = size * 0.5 + 'px';
-                    } else if (contentType.type === 'number') {
-                        bubble.classList.add('number-bubble');
-                        bubble.style.fontSize = size * 0.45 + 'px';
-                    } else if (contentType.type === 'emoji') {
-                        bubble.classList.add('emoji-bubble');
-                    }
-                }
-                
-                const duration = Math.random() * 5 + 5;
-                bubble.style.animationDuration = duration + 's';
-                
-                const bubbleData = {
-                    element: bubble,
-                    content: content,
-                    contentType: contentType.type,
-                    isBlank: isBlank,
-                    duration: duration,
-                    created: Date.now(),
-                    isPopping: false
-                };
-                
-                bubble.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!bubbleData.isPopping) {
-                        this.popBubble(bubbleData);
-                    }
-                });
-                
-                bubble.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
-                    if (!bubbleData.isPopping) {
-                        this.popBubble(bubbleData);
-                    }
-                });
-                
-                bubble.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!bubbleData.isPopping) {
-                        this.popBubble(bubbleData);
-                    }
-                }, { passive: false });
-                
-                document.body.appendChild(bubble);
-                this.bubbles.push(bubbleData);
-                this.bubbleCount++;
-                
-                setTimeout(() => {
-                    if (bubbleData.element.parentNode && !bubbleData.isPopping) {
-                        this.removeBubble(bubbleData, false);
-                    }
-                }, duration * 1000);
-            }
-
-            popBubble(bubbleData) {
-                if (!bubbleData.element.parentNode || bubbleData.isPopping) return;
-                
-                bubbleData.isPopping = true;
-                bubbleData.element.classList.add('bubble-popping');
-                
-                this.createParticles(bubbleData);
-                this.playPopSound();
-                
-                // If not blank, speak the content with a delay
-                if (!bubbleData.isBlank) {
-                    // Wait for pop sound to finish (100ms) then speak
-                    setTimeout(() => {
-                        this.speakContent(bubbleData.content);
-                    }, 150);
-                }
-                
-                this.score++;
-                this.updateScore();
-                
-                setTimeout(() => {
-                    this.removeBubble(bubbleData, true);
-                }, 300);
-            }
-
-            createParticles(bubbleData) {
-                const rect = bubbleData.element.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                for (let i = 0; i < 8; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    
-                    const size = Math.random() * 8 + 4;
-                    particle.style.width = size + 'px';
-                    particle.style.height = size + 'px';
-                    
-                    const color = this.colors[Math.floor(Math.random() * this.colors.length)];
-                    particle.style.background = color;
-                    
-                    const angle = (Math.PI * 2 * i) / 8;
-                    const distance = Math.random() * 50 + 30;
-                    const tx = Math.cos(angle) * distance;
-                    const ty = Math.sin(angle) * distance;
-                    
-                    particle.style.setProperty('--tx', tx + 'px');
-                    particle.style.setProperty('--ty', ty + 'px');
-                    particle.style.left = centerX + 'px';
-                    particle.style.top = centerY + 'px';
-                    
-                    document.body.appendChild(particle);
-                    
-                    setTimeout(() => {
-                        if (particle.parentNode) {
-                            particle.remove();
-                        }
-                    }, 500);
-                }
-            }
-
-            playPopSound() {
-                try {
-                    if (this.audioContext.state === 'suspended') {
-                        this.audioContext.resume();
-                    }
-                    
-                    const oscillator = this.audioContext.createOscillator();
-                    const gainNode = this.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-                    
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.1);
-                    
-                    gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
-                    
-                    oscillator.start(this.audioContext.currentTime);
-                    oscillator.stop(this.audioContext.currentTime + 0.1);
-                } catch (e) {
-                    console.log('Audio not available');
-                }
-            }
-
-            speak(text) {
-                if ('speechSynthesis' in window) {
-                    // Cancel ongoing speech
-                    window.speechSynthesis.cancel();
-                    
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    
-                    if (this.selectedVoice) {
-                        utterance.voice = this.selectedVoice;
-                        utterance.lang = this.selectedVoice.lang;
-                    }
-                    
-                    utterance.rate = this.speechRate;
-                    utterance.pitch = this.speechPitch;
-                    utterance.volume = 1;
-                    
-                    // Set flag when speaking
-                    this.isSpeaking = true;
-                    
-                    // When speech ends, wait 1 second before allowing next speech
-                    utterance.onend = () => {
-                        setTimeout(() => {
-                            this.isSpeaking = false;
-                            this.processSpeechQueue();
-                        }, 1000); // 1 second pause after speech
-                    };
-                    
-                    utterance.onerror = () => {
-                        this.isSpeaking = false;
-                    };
-                    
-                    window.speechSynthesis.speak(utterance);
-                }
-            }
-
-            speakContent(content) {
-                // Add to queue if already speaking
-                if (this.isSpeaking) {
-                    this.speechQueue.push(content);
-                } else {
-                    this.speak(content);
-                }
-            }
-
-            processSpeechQueue() {
-                if (this.speechQueue.length > 0 && !this.isSpeaking) {
-                    const nextContent = this.speechQueue.shift();
-                    this.speak(nextContent);
-                }
-            }
-
-            removeBubble(bubbleData, wasPopped) {
-                if (bubbleData.element.parentNode) {
-                    bubbleData.element.remove();
-                }
-                
-                const index = this.bubbles.indexOf(bubbleData);
-                if (index > -1) {
-                    this.bubbles.splice(index, 1);
-                }
-                
-                if (this.bubbles.length < this.maxBubbles) {
-                    setTimeout(() => {
-                        if (this.bubbles.length < this.maxBubbles) {
-                            this.createBubble();
-                        }
-                    }, 200);
-                }
-            }
-
-            updateScore() {
-                document.getElementById('score').textContent = this.score;
-            }
-
-            clearBubbles() {
-                this.bubbles.forEach(bubble => {
-                    if (bubble.element.parentNode) {
-                        bubble.element.remove();
-                    }
-                });
-                this.bubbles = [];
-                clearInterval(this.bubbleInterval);
-                window.speechSynthesis.cancel();
-                this.isSpeaking = false;
-                this.speechQueue = [];
-            }
-        }
-
-        // Initialize the game when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            const game = new BubblePopGame();
-            
-            document.addEventListener('touchend', (e) => {
-                if (e.target.closest('.bubble')) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
-            document.addEventListener('contextmenu', (e) => {
-                if (e.target.closest('.bubble')) {
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
+  setInterval(spawn,900);
+  for(let i=0;i<4;i++) setTimeout(spawn,i*400);
+})();
+</script>
 </body>
 </html>
