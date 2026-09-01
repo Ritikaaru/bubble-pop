@@ -18,7 +18,7 @@
             touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
             height: 100vh;
             width: 100vw;
             position: relative;
@@ -40,6 +40,19 @@
             font-weight: bold;
             text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
             will-change: transform;
+            pointer-events: auto;
+            z-index: 10;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+
+        .bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                inset -5px -5px 15px rgba(0, 0, 0, 0.1),
+                inset 5px 5px 15px rgba(255, 255, 255, 0.5),
+                0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .bubble:active {
@@ -72,6 +85,7 @@
 
         .bubble-popping {
             animation: popAnimation 0.3s ease-out forwards !important;
+            pointer-events: none !important;
         }
 
         .score-display {
@@ -86,6 +100,7 @@
             color: #FF6B6B;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
         }
 
         .title {
@@ -98,6 +113,8 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             z-index: 999;
             text-align: center;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            font-weight: bold;
         }
 
         .particle {
@@ -105,6 +122,7 @@
             border-radius: 50%;
             pointer-events: none;
             animation: particleBurst 0.5s ease-out forwards;
+            z-index: 20;
         }
 
         @keyframes particleBurst {
@@ -135,6 +153,13 @@
             z-index: 1000;
             transition: all 0.3s;
             touch-action: manipulation;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+        }
+
+        .restart-btn:hover {
+            background: #FF5252;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+            transform: translateX(-50%) translateY(-2px);
         }
 
         .restart-btn:active {
@@ -148,16 +173,201 @@
 
         .letter-bubble {
             color: #FF4081;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif !important;
+            font-style: normal !important;
+            font-weight: bold !important;
         }
 
         .number-bubble {
             color: #2196F3;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif !important;
+            font-style: normal !important;
+            font-weight: bold !important;
+        }
+
+        .blank-bubble {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(200, 220, 255, 0.8)) !important;
+        }
+
+        /* Voice settings panel */
+        .voice-settings {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            max-width: 250px;
+            display: none;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+        }
+
+        .voice-settings.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .voice-settings h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .voice-option {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .voice-option:hover {
+            background: #f0f0f0;
+            border-color: #FF6B6B;
+        }
+
+        .voice-option.active {
+            background: #FFE5E5;
+            border-color: #FF6B6B;
+            color: #FF6B6B;
+            font-weight: bold;
+        }
+
+        .voice-toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .voice-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Speed and pitch controls */
+        .voice-controls {
+            margin-top: 10px;
+        }
+
+        .control-group {
+            margin: 8px 0;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 3px;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            margin: 0;
+        }
+
+        .control-group select {
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+        }
+
+        .test-voice-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+        }
+
+        .test-voice-btn:hover {
+            background: #45a049;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 600px) {
+            .voice-settings {
+                max-width: 200px;
+                padding: 10px;
+            }
+            
+            .title {
+                font-size: 22px;
+            }
+            
+            .score-display {
+                font-size: 18px;
+                padding: 8px 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="title">🎈 Pop the Bubbles! 🎈</div>
     <div class="score-display">⭐ <span id="score">0</span></div>
+    
+    <!-- Voice Settings Button -->
+    <button class="voice-toggle-btn" id="voiceToggleBtn" title="Voice Settings">🎙️</button>
+    
+    <!-- Voice Settings Panel -->
+    <div class="voice-settings" id="voiceSettings">
+        <h3>🎙️ Voice Settings</h3>
+        
+        <div class="voice-controls">
+            <div class="control-group">
+                <label>Voice:</label>
+                <select id="voiceSelect" style="width: 100%; padding: 5px; border-radius: 5px;">
+                    <option value="">Loading voices...</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Speed: <span id="speedValue">0.8</span>x</label>
+                <input type="range" id="speedControl" min="0.5" max="1.5" step="0.1" value="0.8">
+            </div>
+            
+            <div class="control-group">
+                <label>Pitch: <span id="pitchValue">1.2</span></label>
+                <input type="range" id="pitchControl" min="0.5" max="2.0" step="0.1" value="1.2">
+            </div>
+            
+            <button class="test-voice-btn" id="testVoiceBtn">🔊 Test Voice</button>
+        </div>
+    </div>
+    
     <button class="restart-btn" id="restartBtn">🔄 New Bubbles!</button>
 
     <script>
@@ -165,16 +375,29 @@
             constructor() {
                 this.score = 0;
                 this.bubbles = [];
-                this.maxBubbles = 8;
+                this.maxBubbles = 10;
                 this.bubbleCount = 0;
                 this.audioContext = null;
                 this.isMobile = 'ontouchstart' in window;
+                this.isDesktop = !this.isMobile || (window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+                this.lastClickTime = 0;
+                this.clickThrottle = 300;
+                this.isSpeaking = false;
+                this.speechQueue = [];
+                
+                // Voice settings
+                this.voices = [];
+                this.selectedVoice = null;
+                this.speechRate = 0.8;
+                this.speechPitch = 1.2;
+                this.voiceSettingsOpen = false;
                 
                 // Content for bubbles
                 this.contentTypes = [
                     { type: 'letter', values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'] },
                     { type: 'number', values: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] },
-                    { type: 'emoji', values: ['😊', '🌟', '🎈', '🦄', '🌈', '🍎', '🐱', '🐶', '🦋', '🌸', '⭐', '🎨', '🚗', '🎵', '🐰'] }
+                    { type: 'emoji', values: ['😊', '🌟', '🎈', '🦄', '🌈', '🍎', '🐱', '🐶', '🦋', '🌸', '⭐', '🎨', '🚗', '🎵', '🐰'] },
+                    { type: 'blank', values: [''] }
                 ];
 
                 // Colors for bubbles
@@ -189,38 +412,161 @@
                     'rgba(150, 100, 255, 0.7)'
                 ];
 
+                // Blank bubble colors (lighter, more bubble-like)
+                this.blankColors = [
+                    'rgba(180, 220, 255, 0.6)',
+                    'rgba(200, 230, 255, 0.6)',
+                    'rgba(220, 240, 255, 0.6)',
+                    'rgba(190, 225, 255, 0.6)',
+                    'rgba(210, 235, 255, 0.6)'
+                ];
+
                 this.initAudio();
+                this.initVoices();
                 this.setupEventListeners();
                 this.startGame();
             }
 
             initAudio() {
-                // Create audio context for sound effects
                 this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
 
+            initVoices() {
+                if ('speechSynthesis' in window) {
+                    this.loadVoices();
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        this.loadVoices();
+                    };
+                }
+            }
+
+            loadVoices() {
+                this.voices = window.speechSynthesis.getVoices();
+                const voiceSelect = document.getElementById('voiceSelect');
+                
+                if (this.voices.length > 0) {
+                    voiceSelect.innerHTML = '';
+                    
+                    const englishVoices = this.voices.filter(voice => 
+                        voice.lang.startsWith('en') || voice.lang.startsWith('EN')
+                    );
+                    
+                    const otherVoices = this.voices.filter(voice => 
+                        !voice.lang.startsWith('en') && !voice.lang.startsWith('EN')
+                    );
+                    
+                    if (englishVoices.length > 0) {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = 'English Voices';
+                        englishVoices.forEach((voice, index) => {
+                            const option = document.createElement('option');
+                            option.value = index;
+                            option.textContent = `${voice.name} (${voice.lang})`;
+                            optgroup.appendChild(option);
+                        });
+                        voiceSelect.appendChild(optgroup);
+                    }
+                    
+                    if (otherVoices.length > 0) {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = 'Other Languages';
+                        otherVoices.forEach((voice, index) => {
+                            const option = document.createElement('option');
+                            option.value = englishVoices.length + index;
+                            option.textContent = `${voice.name} (${voice.lang})`;
+                            optgroup.appendChild(option);
+                        });
+                        voiceSelect.appendChild(optgroup);
+                    }
+                    
+                    const defaultVoiceIndex = englishVoices.findIndex(voice => 
+                        voice.name.includes('Female') || 
+                        voice.name.includes('Samantha') || 
+                        voice.name.includes('Google UK English Female') ||
+                        voice.name.includes('Microsoft Zira')
+                    );
+                    
+                    if (defaultVoiceIndex > -1) {
+                        voiceSelect.value = defaultVoiceIndex;
+                        this.selectedVoice = englishVoices[defaultVoiceIndex];
+                    } else {
+                        this.selectedVoice = englishVoices[0] || this.voices[0];
+                    }
+                } else {
+                    voiceSelect.innerHTML = '<option value="">No voices available</option>';
+                }
+            }
+
             setupEventListeners() {
-                // Restart button
-                document.getElementById('restartBtn').addEventListener('click', () => {
+                const restartBtn = document.getElementById('restartBtn');
+                restartBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.clearBubbles();
+                    this.startGame();
+                });
+                restartBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
                     this.clearBubbles();
                     this.startGame();
                 });
 
-                // Handle visibility change to manage game
+                const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+                const voiceSettings = document.getElementById('voiceSettings');
+                
+                voiceToggleBtn.addEventListener('click', () => {
+                    this.voiceSettingsOpen = !this.voiceSettingsOpen;
+                    if (this.voiceSettingsOpen) {
+                        voiceSettings.classList.add('show');
+                    } else {
+                        voiceSettings.classList.remove('show');
+                    }
+                });
+
+                document.getElementById('voiceSelect').addEventListener('change', (e) => {
+                    const voiceIndex = parseInt(e.target.value);
+                    if (voiceIndex >= 0 && voiceIndex < this.voices.length) {
+                        this.selectedVoice = this.voices[voiceIndex];
+                        this.testVoice();
+                    }
+                });
+
+                document.getElementById('speedControl').addEventListener('input', (e) => {
+                    this.speechRate = parseFloat(e.target.value);
+                    document.getElementById('speedValue').textContent = this.speechRate.toFixed(1);
+                });
+
+                document.getElementById('pitchControl').addEventListener('input', (e) => {
+                    this.speechPitch = parseFloat(e.target.value);
+                    document.getElementById('pitchValue').textContent = this.speechPitch.toFixed(1);
+                });
+
+                document.getElementById('testVoiceBtn').addEventListener('click', () => {
+                    this.testVoice();
+                });
+
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
-                        // Pause game when tab is hidden
                         this.pauseGame();
                     } else {
-                        // Resume game when tab is visible
                         this.resumeGame();
                     }
                 });
 
-                // Handle resize
                 window.addEventListener('resize', () => {
-                    // Recalculate positions if needed
+                    this.bubbles.forEach(bubble => {
+                        if (bubble.element && bubble.element.parentNode) {
+                            const rect = bubble.element.getBoundingClientRect();
+                            if (rect.left < 0 || rect.right > window.innerWidth) {
+                                bubble.element.style.left = Math.random() * (window.innerWidth - rect.width) + 'px';
+                            }
+                        }
+                    });
                 });
+            }
+
+            testVoice() {
+                const testMessage = "Hello! This is your voice test. A B C D E F G!";
+                this.speak(testMessage);
             }
 
             startGame() {
@@ -228,7 +574,6 @@
                 this.updateScore();
                 this.createInitialBubbles();
                 
-                // Create new bubbles periodically
                 this.bubbleInterval = setInterval(() => {
                     if (this.bubbles.length < this.maxBubbles) {
                         this.createBubble();
@@ -239,13 +584,17 @@
             pauseGame() {
                 clearInterval(this.bubbleInterval);
                 this.bubbles.forEach(bubble => {
-                    bubble.element.style.animationPlayState = 'paused';
+                    if (bubble.element) {
+                        bubble.element.style.animationPlayState = 'paused';
+                    }
                 });
             }
 
             resumeGame() {
                 this.bubbles.forEach(bubble => {
-                    bubble.element.style.animationPlayState = 'running';
+                    if (bubble.element) {
+                        bubble.element.style.animationPlayState = 'running';
+                    }
                 });
                 this.bubbleInterval = setInterval(() => {
                     if (this.bubbles.length < this.maxBubbles) {
@@ -255,8 +604,8 @@
             }
 
             createInitialBubbles() {
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => this.createBubble(), i * 300);
+                for (let i = 0; i < 7; i++) {
+                    setTimeout(() => this.createBubble(), i * 200);
                 }
             }
 
@@ -266,91 +615,115 @@
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
                 
-                // Random size (mobile-friendly)
-                const size = Math.random() * 40 + 60; // 60-100px
+                const size = Math.random() * 40 + 60;
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
                 
-                // Random position at bottom
                 const x = Math.random() * (window.innerWidth - size);
                 bubble.style.left = x + 'px';
                 
-                // Random color
-                const color = this.colors[Math.floor(Math.random() * this.colors.length)];
-                bubble.style.background = `radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), ${color})`;
+                // 50% chance of blank bubble
+                const isBlank = Math.random() < 0.5;
                 
-                // Random content
-                const contentType = this.contentTypes[Math.floor(Math.random() * this.contentTypes.length)];
-                const content = contentType.values[Math.floor(Math.random() * contentType.values.length)];
+                let color;
+                let content = '';
+                let contentType;
                 
-                // Set content and styling
-                bubble.textContent = content;
-                if (contentType.type === 'letter') {
-                    bubble.classList.add('letter-bubble');
-                    bubble.style.fontSize = size * 0.5 + 'px';
-                } else if (contentType.type === 'number') {
-                    bubble.classList.add('number-bubble');
-                    bubble.style.fontSize = size * 0.45 + 'px';
+                if (isBlank) {
+                    // Blank bubble - lighter color, no content
+                    color = this.blankColors[Math.floor(Math.random() * this.blankColors.length)];
+                    bubble.classList.add('blank-bubble');
+                    contentType = { type: 'blank', values: [''] };
                 } else {
-                    bubble.classList.add('emoji-bubble');
+                    // Content bubble
+                    color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                    contentType = this.contentTypes[Math.floor(Math.random() * 3)]; // Only letter, number, emoji
+                    content = contentType.values[Math.floor(Math.random() * contentType.values.length)];
                 }
                 
-                // Random animation duration
-                const duration = Math.random() * 5 + 5; // 5-10 seconds
+                bubble.style.background = `radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), ${color})`;
+                
+                // Set content and styling
+                if (!isBlank) {
+                    bubble.textContent = content;
+                    if (contentType.type === 'letter') {
+                        bubble.classList.add('letter-bubble');
+                        bubble.style.fontSize = size * 0.5 + 'px';
+                    } else if (contentType.type === 'number') {
+                        bubble.classList.add('number-bubble');
+                        bubble.style.fontSize = size * 0.45 + 'px';
+                    } else if (contentType.type === 'emoji') {
+                        bubble.classList.add('emoji-bubble');
+                    }
+                }
+                
+                const duration = Math.random() * 5 + 5;
                 bubble.style.animationDuration = duration + 's';
                 
-                // Store bubble data
                 const bubbleData = {
                     element: bubble,
                     content: content,
                     contentType: contentType.type,
+                    isBlank: isBlank,
                     duration: duration,
-                    created: Date.now()
+                    created: Date.now(),
+                    isPopping: false
                 };
                 
-                // Add click/tap handler
-                const handlePop = (e) => {
+                bubble.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.popBubble(bubbleData);
-                };
+                    if (!bubbleData.isPopping) {
+                        this.popBubble(bubbleData);
+                    }
+                });
                 
-                bubble.addEventListener('click', handlePop);
-                bubble.addEventListener('touchstart', handlePop, { passive: false });
+                bubble.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    if (!bubbleData.isPopping) {
+                        this.popBubble(bubbleData);
+                    }
+                });
                 
-                // Add to DOM
+                bubble.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!bubbleData.isPopping) {
+                        this.popBubble(bubbleData);
+                    }
+                }, { passive: false });
+                
                 document.body.appendChild(bubble);
                 this.bubbles.push(bubbleData);
                 this.bubbleCount++;
                 
-                // Remove bubble after animation ends
                 setTimeout(() => {
-                    if (bubbleData.element.parentNode) {
+                    if (bubbleData.element.parentNode && !bubbleData.isPopping) {
                         this.removeBubble(bubbleData, false);
                     }
                 }, duration * 1000);
             }
 
             popBubble(bubbleData) {
-                if (!bubbleData.element.parentNode) return;
+                if (!bubbleData.element.parentNode || bubbleData.isPopping) return;
                 
-                // Add popping animation
+                bubbleData.isPopping = true;
                 bubbleData.element.classList.add('bubble-popping');
                 
-                // Create particles
                 this.createParticles(bubbleData);
-                
-                // Play sound
                 this.playPopSound();
                 
-                // Speak the content
-                this.speakContent(bubbleData.content);
+                // If not blank, speak the content with a delay
+                if (!bubbleData.isBlank) {
+                    // Wait for pop sound to finish (100ms) then speak
+                    setTimeout(() => {
+                        this.speakContent(bubbleData.content);
+                    }, 150);
+                }
                 
-                // Update score
                 this.score++;
                 this.updateScore();
                 
-                // Remove bubble after animation
                 setTimeout(() => {
                     this.removeBubble(bubbleData, true);
                 }, 300);
@@ -394,19 +767,16 @@
 
             playPopSound() {
                 try {
-                    // Resume audio context if suspended (mobile browsers)
                     if (this.audioContext.state === 'suspended') {
                         this.audioContext.resume();
                     }
                     
-                    // Create pop sound using oscillator
                     const oscillator = this.audioContext.createOscillator();
                     const gainNode = this.audioContext.createGain();
                     
                     oscillator.connect(gainNode);
                     gainNode.connect(this.audioContext.destination);
                     
-                    // Pop sound characteristics
                     oscillator.type = 'sine';
                     oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime);
                     oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.1);
@@ -421,19 +791,53 @@
                 }
             }
 
-            speakContent(content) {
-                // Use Web Speech API for text-to-speech
+            speak(text) {
                 if ('speechSynthesis' in window) {
-                    // Cancel any ongoing speech
+                    // Cancel ongoing speech
                     window.speechSynthesis.cancel();
                     
-                    const utterance = new SpeechSynthesisUtterance(content);
-                    utterance.rate = 0.8; // Slower for babies
-                    utterance.pitch = 1.2; // Higher pitch for friendly tone
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    
+                    if (this.selectedVoice) {
+                        utterance.voice = this.selectedVoice;
+                    }
+                    
+                    utterance.rate = this.speechRate;
+                    utterance.pitch = this.speechPitch;
                     utterance.volume = 1;
                     
-                    // Speak the content
+                    // Set flag when speaking
+                    this.isSpeaking = true;
+                    
+                    // When speech ends, wait 1 second before allowing next speech
+                    utterance.onend = () => {
+                        setTimeout(() => {
+                            this.isSpeaking = false;
+                            this.processSpeechQueue();
+                        }, 1000); // 1 second pause after speech
+                    };
+                    
+                    utterance.onerror = () => {
+                        this.isSpeaking = false;
+                    };
+                    
                     window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            speakContent(content) {
+                // Add to queue if already speaking
+                if (this.isSpeaking) {
+                    this.speechQueue.push(content);
+                } else {
+                    this.speak(content);
+                }
+            }
+
+            processSpeechQueue() {
+                if (this.speechQueue.length > 0 && !this.isSpeaking) {
+                    const nextContent = this.speechQueue.shift();
+                    this.speak(nextContent);
                 }
             }
 
@@ -447,7 +851,6 @@
                     this.bubbles.splice(index, 1);
                 }
                 
-                // Create replacement bubble
                 if (this.bubbles.length < this.maxBubbles) {
                     setTimeout(() => {
                         if (this.bubbles.length < this.maxBubbles) {
@@ -470,6 +873,8 @@
                 this.bubbles = [];
                 clearInterval(this.bubbleInterval);
                 window.speechSynthesis.cancel();
+                this.isSpeaking = false;
+                this.speechQueue = [];
             }
         }
 
@@ -477,12 +882,17 @@
         window.addEventListener('DOMContentLoaded', () => {
             const game = new BubblePopGame();
             
-            // Prevent double-tap zoom on mobile
             document.addEventListener('touchend', (e) => {
                 if (e.target.closest('.bubble')) {
                     e.preventDefault();
                 }
             }, { passive: false });
+            
+            document.addEventListener('contextmenu', (e) => {
+                if (e.target.closest('.bubble')) {
+                    e.preventDefault();
+                }
+            });
         });
     </script>
 </body>
